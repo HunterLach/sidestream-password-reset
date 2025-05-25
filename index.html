@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reset Password - SideStream</title>
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            padding: 40px;
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+        }
+        
+        .logo {
+            font-size: 32px;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 8px;
+        }
+        
+        .subtitle {
+            color: #666;
+            margin-bottom: 32px;
+            font-size: 14px;
+        }
+        
+        .icon {
+            width: 64px;
+            height: 64px;
+            background: #4ade80;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 24px;
+            font-size: 24px;
+        }
+        
+        h1 {
+            color: #333;
+            margin-bottom: 16px;
+            font-size: 24px;
+        }
+        
+        .description {
+            color: #666;
+            margin-bottom: 32px;
+            line-height: 1.5;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 500;
+        }
+        
+        input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        
+        input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .btn {
+            width: 100%;
+            padding: 12px;
+            background: #4ade80;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        
+        .btn:hover {
+            background: #16a34a;
+        }
+        
+        .btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        
+        .error {
+            background: #fee2e2;
+            color: #dc2626;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+        
+        .success {
+            background: #d1fae5;
+            color: #059669;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+        
+        .back-link {
+            margin-top: 20px;
+            color: #667eea;
+            text-decoration: none;
+            font-size: 14px;
+        }
+        
+        .loading {
+            display: none;
+            margin-top: 10px;
+        }
+        
+        .app-download {
+            margin-top: 32px;
+            padding: 20px;
+            background: #f8fafc;
+            border-radius: 8px;
+        }
+        
+        .app-download h3 {
+            color: #333;
+            margin-bottom: 12px;
+            font-size: 18px;
+        }
+        
+        .app-download p {
+            color: #666;
+            margin-bottom: 16px;
+            font-size: 14px;
+        }
+        
+        .download-btn {
+            display: inline-block;
+            background: #333;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="logo">SideStream</div>
+        <div class="subtitle">Financial Goal Tracking</div>
+        
+        <div id="resetForm">
+            <div class="icon">🔒</div>
+            <h1>Reset Your Password</h1>
+            <div class="description">
+                Enter your new password below. Make sure it's strong and secure.
+            </div>
+            
+            <div id="errorMessage" class="error" style="display: none;"></div>
+            <div id="successMessage" class="success" style="display: none;"></div>
+            
+            <form id="passwordForm">
+                <div class="form-group">
+                    <label for="password">New Password</label>
+                    <input type="password" id="password" required minlength="6" placeholder="Enter your new password">
+                </div>
+                
+                <div class="form-group">
+                    <label for="confirmPassword">Confirm Password</label>
+                    <input type="password" id="confirmPassword" required placeholder="Confirm your new password">
+                </div>
+                
+                <button type="submit" class="btn" id="submitBtn">
+                    Update Password
+                </button>
+                
+                <div class="loading" id="loading">
+                    <div style="color: #666;">Updating your password...</div>
+                </div>
+            </form>
+        </div>
+        
+        <div id="successView" style="display: none;">
+            <div class="icon">✅</div>
+            <h1>Password Updated!</h1>
+            <div class="description">
+                Your password has been successfully updated. You can now sign in to the SideStream app with your new password.
+            </div>
+            
+            <div class="app-download">
+                <h3>Return to SideStream</h3>
+                <p>Download the app to continue tracking your financial goals:</p>
+                <a href="#" class="download-btn">Download SideStream App</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Initialize Supabase
+        const supabaseUrl = 'https://pexpzcizovfrgmtwujxj.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBleHB6Y2l6b3ZmcmdtdHd1anhqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDYzNDAxODQsImV4cCI6MjA2MTkxNjE4NH0.546P5bjKjmJtihMm-ks3qLQz41FixXr1_n907wGujFc';
+        const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+        
+        // Get access token from URL hash
+        const hashParams = new URLSearchParams(window.location.hash.substring(1));
+        const accessToken = hashParams.get('access_token');
+        const refreshToken = hashParams.get('refresh_token');
+        
+        // Check if we have tokens
+        if (!accessToken) {
+            showError('Invalid reset link. Please request a new password reset.');
+        }
+        
+        // Handle form submission
+        document.getElementById('passwordForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            
+            // Validate passwords match
+            if (password !== confirmPassword) {
+                showError('Passwords do not match');
+                return;
+            }
+            
+            // Validate password length
+            if (password.length < 6) {
+                showError('Password must be at least 6 characters long');
+                return;
+            }
+            
+            // Show loading
+            showLoading(true);
+            hideError();
+            
+            try {
+                // Set the session with the tokens
+                const { error: sessionError } = await supabase.auth.setSession({
+                    access_token: accessToken,
+                    refresh_token: refreshToken
+                });
+                
+                if (sessionError) throw sessionError;
+                
+                // Update password
+                const { error } = await supabase.auth.updateUser({
+                    password: password
+                });
+                
+                if (error) throw error;
+                
+                // Show success
+                showSuccess();
+                
+            } catch (error) {
+                console.error('Error updating password:', error);
+                showError(error.message || 'Failed to update password. Please try again.');
+            } finally {
+                showLoading(false);
+            }
+        });
+        
+        function showError(message) {
+            const errorEl = document.getElementById('errorMessage');
+            errorEl.textContent = message;
+            errorEl.style.display = 'block';
+            document.getElementById('successMessage').style.display = 'none';
+        }
+        
+        function hideError() {
+            document.getElementById('errorMessage').style.display = 'none';
+        }
+        
+        function showSuccess() {
+            document.getElementById('resetForm').style.display = 'none';
+            document.getElementById('successView').style.display = 'block';
+        }
+        
+        function showLoading(show) {
+            document.getElementById('loading').style.display = show ? 'block' : 'none';
+            document.getElementById('submitBtn').disabled = show;
+            document.getElementById('submitBtn').textContent = show ? 'Updating...' : 'Update Password';
+        }
+    </script>
+</body>
+</html> 
